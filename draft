@@ -1,0 +1,15 @@
+Raw input data parser
+  Data type definition
+    Event separator (\n, ^[0-9]{4}, etc)
+    Date extraction regex
+    Field extraction regex
+  Support multiple data types per input stream
+  Event filtering
+    Date range
+    Field values
+Event processor
+  Bucket type
+    Field values
+    Field value interval
+    QPS
+  Output histogram
