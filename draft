@@ -2,7 +2,11 @@ Raw input data parser
   Data type definition
     Event separator (\n, ^[0-9]{4}, etc)
     Date extraction regex
+      Support incomplete dates (eg. Syslog).
+      Support different locales (eg. Month name).
+    Time Zone
     Support multiple event types per input stream
+    Encoding
     Event Type
         Field extraction regex
   Event filtering
