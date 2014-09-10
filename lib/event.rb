@@ -1,23 +1,28 @@
 class Event
-  attr_accessor :raw, :time
-  def initialize(
-    raw: nil,
-    time: nil,
-    field_extraction: nil
-    )
-    @raw = raw
-    @time = time
-    @field_extraction = field_extraction
+
+  attr_accessor :raw, :type
+
+  def initialize raw, type
+    @type = type
+    @raw = type
   end
-  def fields
-    @field_extraction.names
+
+  def time
+    @raw
+    @type.time_prefix # regex
+    @type.time_format # DateTime.strptime
+    @type.time_utc_offset # em segundos
   end
-  def [] field
-    m = @raw.match(@field_extraction)
-    if m
-      m[field]
-    else
-      raise "Unable to match event against #{@field_extraction}."
-    end
+
+  def field_names
+    @type.fields # regex
   end
+
+  def [] field_name
+    @raw
+    @type.fields
+  end
+
+  private
+
 end
