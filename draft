@@ -1,21 +1,30 @@
-Raw input data parser
-  Data type definition
-    Event separator (\n, ^[0-9]{4}, etc)
-    Date extraction regex
-      Support incomplete dates (eg. Syslog).
-      Support different locales (eg. Month name).
-    Time Zone
-    Support multiple event types per input stream
-    Encoding
-    Event Type
-        Field extraction regex
-  Event filtering
-    Date range
-    Field regexp
-    Field range
-Event processor
-  Bucket type
-    Field values
-    Field value interval
-    QPS
-  Output histogram
+Event::Type
+  time_prefix
+  time_format
+  time_zone
+  fields
+
+Event
+  raw
+  type
+
+Parser
+  io
+  max_line_bytes
+  multi_line?
+  multi_line_start
+  multi_line_max
+
+Filter
+  by time range
+  by field regex
+  by field range
+
+Report
+  buckets by
+    field text
+    field values range
+    time
+      count
+      avg
+      sum
