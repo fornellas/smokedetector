@@ -18,8 +18,8 @@ def add_event_context options={}
     include_context "#{options[:name]} type"
     let(:event) do
       Event.new(
-        options[:raw],
-        options[:type],
+        raw: options[:raw],
+        type: type,
         )
     end
   end

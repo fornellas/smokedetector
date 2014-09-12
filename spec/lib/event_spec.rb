@@ -16,7 +16,7 @@ describe Event do
         end
       end
       context '#[]' do
-        it 'should extract fields returned by #field_names' do
+        it 'should be able to extract all fields returned by #type.field_names' do
           event.type.field_names.each do |field_name|
             expect(event[field_name]).to be_kind_of String
           end
