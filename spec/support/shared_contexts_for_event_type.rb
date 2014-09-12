@@ -1,7 +1,23 @@
 require 'event'
 require 'event/type'
 
-shared_context "syslog" do
+# Event::Type shared context names
+$event_type_contexts = []
+
+# Add one more shared context to $event_type_contexts
+def add_event_type_context options={}, &block
+  context_name = "#{options[:name]} type"
+  $event_type_contexts << {
+    name: context_name,
+    field_names: options[:field_names],
+    }
+  shared_context context_name, &block
+end
+
+add_event_type_context({
+  name: 'syslog',
+  field_names: ['hostname', 'client', 'pid'],
+  }) do
   let(:type) do
     Event::Type.new(
       time_prefix: //,
@@ -11,7 +27,10 @@ shared_context "syslog" do
   end
 end
 
-shared_context "with time prefix" do
+add_event_type_context({
+  name: 'with time prefix',
+  field_names: ['message'],
+  }) do
   let(:type) do
     Event::Type.new(
       time_prefix: /^time_prefix/,

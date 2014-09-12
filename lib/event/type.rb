@@ -1,6 +1,6 @@
 class Event::Type
 
-  PUBLIC_ATTRS = [:time_prefix, :time_format, :time_utc_offset, :fields]
+  PUBLIC_ATTRS = [:time_prefix, :time_format, :fields]
 
   attr_accessor(*PUBLIC_ATTRS)
 
@@ -8,6 +8,10 @@ class Event::Type
     PUBLIC_ATTRS.each do |attr|
      eval "@#{attr} = options[:#{attr}]"
     end
+  end
+
+  def field_names
+    @fields.names
   end
 
 end
