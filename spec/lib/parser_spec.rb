@@ -2,7 +2,7 @@ require 'parser'
 
 describe Parser do
   context '#each' do
-    xit 'should throw exception if a line is longer than #max_line_bytes' do
+    xit 'should throw exception if a line is longer than #max_line_lenght' do
       
     end
     context 'single line events' do
