@@ -38,8 +38,8 @@ add_event_context(
 
 add_event_context(
   name: 'with time prefix',
-  raw: 'time_prefixSep 11 21:55:01 message',
-  time: Time.parse('Sep 11 21:55:01'),
+  raw: 'time_prefix2014-09-10 11:23:33 message',
+  time: Time.parse('2014-09-10 11:23:33'),
   fields: {
     message: 'message',
     }
