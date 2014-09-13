@@ -1,3 +1,5 @@
+require 'time'
+
 class Event
 
   attr_accessor :raw, :type
@@ -10,17 +12,22 @@ class Event
 
   # Extracted time of event.
   def time
-#    Implement using:
-#    @raw
-#    @type.time_prefix # regex
-#    @type.time_format # DateTime.strptime
+    if type.time_prefix
+      time_str = raw.partition(type.time_prefix)[2]
+    else
+      time_str = raw
+    end
+    gmt = DateTime.strptime(time_str, type.time_format).to_time
+    gmt - Time.now.gmtoff
   end
 
   # Extract fields from event. Field names are returned by #type.field_names
   def [] field_name
-#    Implement using:
-#    @raw
-#    @type.field_names
+    if matches = raw.match(type.fields)
+      matches[field_name]
+    else
+      raise "Unable to match event against #{type.fields}."
+    end
   end
 
   private

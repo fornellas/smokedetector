@@ -20,8 +20,8 @@ add_event_type_context({
   }) do
   let(:type) do
     Event::Type.new(
-      time_prefix: //,
-      time_format: '%Y-%m-%d %H:%M:%S',
+      time_prefix: nil,
+      time_format: '%b %d %H:%M:%S',
       fields: /^[a-z]+ +\d+ \d{2}:\d{2}:\d{2} (?<hostname>[a-z\-.]+) ((?<client>[^\[]+)\[(?<pid>\d+)\]|(?<client>[^:]+)): /i,
       )
   end
@@ -35,7 +35,7 @@ add_event_type_context({
     Event::Type.new(
       time_prefix: /^time_prefix/,
       time_format: '%Y-%m-%d %H:%M:%S',
-      fields: /^time_prefix[a-z]+ +\d+ \d{2}:\d{2}:\d{2} (?<message>.+)/i,
+      fields: /^time_prefix\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} (?<message>.+)/i,
       )
   end
 end

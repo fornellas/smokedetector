@@ -11,7 +11,7 @@ Event
 Parser
   io
   type
-  max_line_bytes
+  max_line_length
   multi_line?
   multi_line_start
   multi_line_max

@@ -7,7 +7,9 @@ describe Event::Type do
     context event_type_context[:name] do
       include_context event_type_context[:name]
       it 'has common attributes' do
-        expect(type.time_prefix).to be_kind_of Regexp
+        if type.time_prefix
+          expect(type.time_prefix).to be_kind_of Regexp
+        end
         expect(type.time_format).to be_kind_of String
         expect(type.fields).to be_kind_of Regexp
       end
