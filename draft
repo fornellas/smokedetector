@@ -29,3 +29,25 @@ Report
       count
       avg
       sum
+
+Grammar
+from DATE
+to DATE
+field NAME [
+  REGEX |
+  [min VALUE] [max VALUE]
+  ]
+
+by 
+  field NAME
+  [second|minute|hour|day|week]
+oper
+	count
+	sum
+	max
+	min
+	avg
+	median
+	mode
+
+^(from|to)
