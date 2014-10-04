@@ -6,15 +6,7 @@ describe Parser do
   context '#each' do
 
     include_context 'syslog type'
-
-    let(:parser_syslog) do
-      Parser.new(
-        io: File.open('spec/support/logs/syslog'),
-        event_type: type,
-        max_line_length: 1000,
-        multi_line: false,
-        )
-    end
+    include_context 'parser syslog'
 
     it 'should throw exception if a line is longer than #max_line_lenght' do
       expect do

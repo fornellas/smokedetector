@@ -30,24 +30,25 @@ Report
       avg
       sum
 
-Grammar
-from DATE
-to DATE
-field NAME [
-  REGEX |
-  [min VALUE] [max VALUE]
-  ]
-
-by 
-  field NAME
-  [second|minute|hour|day|week]
-oper
-	count
-	sum
-	max
-	min
-	avg
-	median
-	mode
-
-^(from|to)
+filter
+  from|to DATE
+  field FIELD
+    matches REGEXP
+    min|max VALUE
+graph
+    average|avg|mean FIELD
+    count
+    distinct_count|dc FIELD
+    maximum|max FIELD
+    minimum|min FIELD
+    median FIELD
+    mode FIELD
+    sum FIELD
+  by
+    field NAME
+    second|minute|hour|day|week
+sort as
+  numbers
+  strings
+    insensitive
+  reverse
