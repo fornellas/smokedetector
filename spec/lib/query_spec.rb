@@ -13,7 +13,12 @@ describe Query do
   end
 
   context '#each' do
-    xit 'should yield each filtered event to given block' do
+    it 'should yield each filtered event to given block' do
+      event_count = 0
+      @query.each do |event|
+        event_count += 1
+      end
+      expect(event_count).to eq(5)
     end
   end
 
@@ -26,6 +31,12 @@ describe Query do
       query = ['from', 'Sep 13 16:11:54', 'a', 'b']
       @query.where(query)
       expect(query).to eq(['a', 'b'])
+    end
+
+    it 'should accept multiple filters an process them as an AND' do
+      query = ['from', 'Sep 13 16:11:53', 'to', 'Sep 13 16:15:01']
+      event_count = @query.where(query).count
+      expect(event_count).to eq(3)
     end
 
     [
@@ -41,30 +52,21 @@ describe Query do
         query: ['field', 'pid', 'matches', '55'],
         expected_count: 2,
         },
+      {
+        query: ['field', 'pid', 'min', '20000'],
+        expected_count: 3,
+        },
+      {
+        query: ['field', 'pid', 'max', '20000'],
+        expected_count: 2,
+        },
 =begin
       {
-        query: field [NAME] min [VALUE],
-        expected_count: ,
-        },
-      {
-        query: field [NAME] max [VALUE],
-        expected_count: ,
-        },
-      {
-        query: first [COUNT],
-        expected_count: ,
+        query: ['first', '2'],
+        expected_count: 2,
         },
       {
         query: skip [COUNT],
-        expected_count: ,
-        },
-      {
-        query: percent [VALUE],
-        expected_count: ,
-        },
-
-      {
-        query: ,
         expected_count: ,
         },
 =end
@@ -80,6 +82,10 @@ describe Query do
         expect(event_count).to eq(5-ex[:expected_count])
       end
 
+    end
+
+    example 'percent 40' do
+      pending
     end
 
   end
