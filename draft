@@ -1,41 +1,11 @@
-Event::Type
-  time_prefix
-  time_format
-  time_zone
-  fields
-
-Event
-  raw
-  type
-
-Parser
-  io
-  type
-  max_line_length
-  multi_line?
-  multi_line_start
-  multi_line_max
-
-Filter
-  by time range
-  by field regex
-  by field range
-
-Report
-  buckets by
-    field text
-    field values range
-    time
-      count
-      avg
-      sum
-
-filter
+query
   from|to DATE
   field FIELD
     matches REGEXP
     min|max VALUE
-graph
+  first COUNT
+  skip COUNT
+report
     average|avg|mean FIELD
     count
     distinct_count|dc FIELD
@@ -45,7 +15,8 @@ graph
     mode FIELD
     sum FIELD
   by
-    field NAME
+    field_name NAME
+    field_range NAME VALUE
     second|minute|hour|day|week
 sort as
   numbers
