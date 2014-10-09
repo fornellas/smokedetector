@@ -9,7 +9,7 @@ describe Query do
   include_context 'parser syslog'
 
   before(:example) do
-    @filter = Query.new parser_syslog
+    @query = Query.new parser_syslog
   end
 
   context '#each' do
@@ -17,63 +17,71 @@ describe Query do
     end
   end
 
-  shared_examples 'where | not' do
-    xit 'should return self' do
-    end
-
-    xit 'should return extra arguments' do
-    end
-
-    context 'time' do
-      it 'from [DATE]' do
-        query = ['from', 'Sep 13 16:11:54']
-        count = @filter.send(method, *query).count
-        expect(count).to eq(3) if method == :where
-        expect(count).to eq(2) if method == :not
-      end
-
-      it 'to [DATE]' do
-        query = ['to', 'Sep 13 16:11:54']
-        count = @filter.send(method, *query).count
-        expect(count).to eq(3) if method == :where
-        expect(count).to eq(2) if method == :not
-      end
-    end
-
-    context 'field' do
-      it 'field [NAME] matches [REGEXP]' do
-        query = ['field', 'pid', 'matches', '55']
-        count = @filter.send(method, *query).count
-        expect(count).to eq(2) if method == :where
-        expect(count).to eq(3) if method == :not
-      end
-
-      xit 'field [NAME] min [VALUE]' do
-      end
-
-      xit 'field [NAME] max [VALUE]' do
-      end
-    end
-    context 'slice' do
-      xit 'first [COUNT]' do
-      end
-
-      xit 'skip [COUNT]' do
-      end
-
-      xit 'percent [VALUE]' do
-      end
-    end
-  end
-
   context '#where' do
-    let(:method){ :where }
-    include_examples 'where | not'
-  end
+    it 'should return self' do
+      expect(@query.where([])).to eq(@query)
+    end
 
-  context '#not' do
-    let(:method){ :not }
-    include_examples 'where | not'
+    it 'should consume known arguments from filters' do
+      query = ['from', 'Sep 13 16:11:54', 'a', 'b']
+      @query.where(query)
+      expect(query).to eq(['a', 'b'])
+    end
+
+    [
+      {
+        query: ['from', 'Sep 13 16:11:54'],
+        expected_count: 3,
+        },
+      {
+        query: ['to', 'Sep 13 16:11:54'],
+        expected_count: 3,
+        },
+      {
+        query: ['field', 'pid', 'matches', '55'],
+        expected_count: 2,
+        },
+=begin
+      {
+        query: field [NAME] min [VALUE],
+        expected_count: ,
+        },
+      {
+        query: field [NAME] max [VALUE],
+        expected_count: ,
+        },
+      {
+        query: first [COUNT],
+        expected_count: ,
+        },
+      {
+        query: skip [COUNT],
+        expected_count: ,
+        },
+      {
+        query: percent [VALUE],
+        expected_count: ,
+        },
+
+      {
+        query: ,
+        expected_count: ,
+        },
+=end
+      ].each do |ex|
+
+      example ex[:query].join(' ') do
+        event_count = @query.where(ex[:query].dup).count
+        expect(event_count).to eq(ex[:expected_count])
+      end
+ 
+      example "not " + ex[:query].join(' ') do
+        event_count = @query.where(['not'] + ex[:query].dup).count
+        expect(event_count).to eq(5-ex[:expected_count])
+      end
+
+    end
+
   end
 
 end

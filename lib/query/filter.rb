@@ -1,60 +1,50 @@
 class Query
   class Filter
-    def initialize *filters
-      @filters = filters
-      zero_filters
-      until filters.empty?
-        case @filters.first
-        when 'from'
-          @from_time = parse_time( fetch_args(1).first )
-        when 'to'
-          @to_time = parse_time( fetch_args(1).first )
-        when 'field'
-          args = fetch_args(3)
-          name = args[0]
-          cmd = args[1]
-          arg = args[2]
-          case cmd
-          when 'matches'
-            @field_matches << {
-              name: name,
-              regexp: Regexp.new( arg ),
-             }
-          else
-            raise "Unknown argument '#{cmd}' to 'field'."
-          end
+
+    # Parse filters and return an array of Filter objects, consuming only known
+    # arguments from query array.
+    def self.parse query
+      @query = query
+      @filters = []
+      until @query.empty?
+        filter = nil
+        if @query.first == 'not'
+          raise "Missing arguments after 'not'." if @query.size < 2
+          @query.shift
+          filter = get_filter(true)
         else
-          return filters
+          filter = get_filter(false)
+        end
+        if filter
+          @filters << filter
+        else
+          break
         end
       end
-    end
-
-    def match? event
-      # from
-      return false if @from_time and event.time < @from_time
-      # to
-      return false if @to_time and event.time > @to_time
-      # field match
-      @field_matches.each do |field_match|
-        regexp = field_match[:regexp]
-        field_name = field_match[:name]
-        value = event[field_name]
-        return false unless regexp.match value
-      end
-      true
+      return @filters
     end
 
     private
 
-    def zero_filters
-      @from_time = nil
-      @to_time = nil
-      @field_matches = []
+    # Return Filter after parsing @query
+    def self.get_filter inverse
+      until @query.empty?
+        case @query.first
+        when 'from'
+          from_time = parse_time( fetch_args(1).first )
+          return Filter.new(inverse: inverse, from_time: from_time)
+        when 'to'
+          to_time = parse_time( fetch_args(1).first )
+          return Filter.new(inverse: inverse, to_time: to_time)
+        else
+          return nil
+        end
+      end
     end
 
     # Return an array of 'count' arguments from @filters, starting at 1.
-    def fetch_args count
-      cli = @filters.shift(1+count)
+    def self.fetch_args count
+      cli = @query.shift(1+count)
       command = cli.first
       args = cli.drop(1)
       raise "Too few arguments to '#{command}'." if args.size != count
@@ -62,8 +52,29 @@ class Query
     end
 
     # Parse time from given string
-    def parse_time str
+    def self.parse_time str
       Time.parse str
     end
+
+    public
+
+    def initialize filter
+      @filter = filter
+    end
+
+    # True if filter is inverse (not).
+    def inverse?
+      @filter[:inverse]
+    end
+
+    # True if filter match event
+    def match? event
+      # from
+      return false if @filter[:from_time] and event.time < @filter[:from_time]
+      # to
+      return false if @filter[:to_time] and event.time > @filter[:to_time]
+      true
+    end
+
   end
 end
