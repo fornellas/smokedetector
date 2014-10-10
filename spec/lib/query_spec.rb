@@ -84,8 +84,11 @@ describe Query do
 
     end
 
-    example 'percent 40' do
-      pending
+    example 'percent 0' do
+      allow(Random).to receive(:rand).and_return(1)
+      query = ['percent', '0']
+      event_count = @query.where(query).count
+      expect(event_count).to eq(0)
     end
 
   end

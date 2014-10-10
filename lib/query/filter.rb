@@ -113,21 +113,9 @@ class Query
           return false unless Float(event[name]) <= arg
         end
       when :percent
-        return false unless Random.rand >= Float(@args)/100
+        return false unless Random.rand <= Float(@args)/100
       end
       true
-=begin
-      # from
-      if @filter[:from_time] and if event.time < @filter[:from_time]
-        return false || @filter[:inverse]
-      end
-      # to
-        
-      return false if @filter[:to_time] and event.time > @filter[:to_time]
-      true
-      # field
-      
-=end
     end
 
   end
