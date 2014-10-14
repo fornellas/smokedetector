@@ -26,7 +26,7 @@ class Event
     if matches = raw.match(type.fields)
       matches[field_name]
     else
-      raise "Unable to match event against #{type.fields}."
+      raise "Unable to match event '#{raw}' against #{type.fields}."
     end
   end
 

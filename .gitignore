@@ -1,6 +1,8 @@
 *.swp
 *.gem
 *.rbc
+*.sublime-project
+*.sublime-workspace
 /.config
 /coverage/
 /InstalledFiles

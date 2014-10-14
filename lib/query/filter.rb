@@ -1,16 +1,19 @@
+require 'parsing'
+
 class Query
   class Filter
+    extend Parsing
 
     # Parse filters and return an array of Filter objects, consuming only known
     # arguments from query array.
-    def self.parse query
-      @query = query
+    def self.parse args
+      @args = args
       @filters = []
-      until @query.empty?
+      until @args.empty?
         filter = nil
-        if @query.first == 'not'
-          raise "Missing arguments after 'not'." if @query.size < 2
-          @query.shift
+        if @args.first == 'not'
+          raise "Missing arguments after 'not'." if @args.size < 2
+          @args.shift
           filter = get_filter(true)
         else
           filter = get_filter(false)
@@ -26,10 +29,10 @@ class Query
 
     private
 
-    # Return Filter after parsing @query
+    # Return Filter after parsing @args
     def self.get_filter inverse
-      until @query.empty?
-        case @query.first
+      until @args.empty?
+        case @args.first
         when 'from'
           from_time = parse_time( fetch_args(1).first )
           return Filter.new(inverse: inverse, command: :from, args: from_time)
@@ -60,20 +63,6 @@ class Query
           return nil
         end
       end
-    end
-
-    # Return an array of 'count' arguments from @query, starting at 1.
-    def self.fetch_args count
-      cli = @query.shift(1+count)
-      command = cli.first
-      args = cli.drop(1)
-      raise "Too few arguments to '#{command}'." if args.size != count
-      args
-    end
-
-    # Parse time from given string
-    def self.parse_time str
-      Time.parse str
     end
 
     public

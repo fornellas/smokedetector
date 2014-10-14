@@ -39,3 +39,16 @@ add_event_type_context({
       )
   end
 end
+
+add_event_type_context({
+  name: 'http',
+  field_names: ['url', 'status', 'response_time'],
+  }) do
+  let(:type) do
+    Event::Type.new(
+      time_prefix: nil,
+      time_format: '%b %d %H:%M:%S',
+      fields: /^[a-z]+ +\d+ \d{2}:\d{2}:\d{2} (?<url>[^ ]+) (?<status>[^ ]+) (?<response_time>.+)/i,
+      )
+  end
+end

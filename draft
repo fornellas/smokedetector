@@ -5,21 +5,86 @@ query
     min|max VALUE
   first COUNT
   skip COUNT
-report
-    average|avg|mean FIELD
-    count
-    distinct_count|dc FIELD
-    maximum|max FIELD
-    minimum|min FIELD
-    median FIELD
-    mode FIELD
-    sum FIELD
+report Stat by Bucket
+    average FIELD[/FIELD]
+    count events[/FIELD]
+    distinct_count FIELD[/FIELD]
+    maximum|max FIELD[/FIELD]
+    minimum|min FIELD[/FIELD]
+    median FIELD[/FIELD]
+    mode FIELD[/FIELD]
+    sum FIELD[/FIELD]
   by
-    field_name NAME
-    field_range NAME VALUE
+    field NAME
+    partition VALUE
+    time TIME
     second|minute|hour|day|week
 sort as
   numbers
   strings
     insensitive
   reverse
+graph
+  column
+  stacked
+
+###############################################################################
+
+count status by field url
+
+url  200  500
+/a   1    2
+/b   3    4
+
+/a -
+   ==
+/b ---
+   ====
+(-) 200, (=) 500
+
+###############################################################################
+
+count request_time by partition 100
+
+request_time  count
+0-100         2
+100-200       5
+200-300       1
+
+0-100   --
+100-200 -----
+200-300 -
+
+###############################################################################
+
+avg response_time by field url
+
+url  avg(request_time)
+/a   5
+/b   3
+
+/a -----
+/b ---
+
+###############################################################################
+
+distinct_count client_ip/url by hour
+
+hour  /a  /b
+11    5   3
+12    3   2
+13    2   5
+
+11 -----===
+12 ---==
+13 --=====
+(-) /a, (=) /b
+
+###############################################################################
+
+
+count events by second
+count events by hour
+avg response_time by minute
+mode response_time by field URL
+count by field url

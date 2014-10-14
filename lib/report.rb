@@ -1,41 +1,37 @@
+require 'report/stat'
+require 'report/bucket'
+
 class Report
+
   def initialize query
     @query = query
+    @stat = nil
+    @bucket = nil
   end
 
   def where report
-    @report = report
-    until @report.empty?
-      case @report.first
-      when 'average'
-        return average( fetch_args(1).first )
-      else
-        raise "Unknow report command '#{@report.first}'"
-      end
+    @stat = Stat.parse(report)
+    if 'by' != (arg=report.shift)
+      raise "Wrong argument '#{arg}', should be 'by'."
     end
+    @bucket = Bucket.parse(report)
+    @stat.bucket = @bucket
+    matrix
   end
 
   private
 
-  # Return an array of 'count' arguments from @report, starting at 1.
-  def fetch_args count
-    cli = @report.shift(1+count)
-    command = cli.first
-    args = cli.drop(1)
-    raise "Too few arguments to '#{command}'." if args.size != count
-    args
+  # Calculate resulting matrix based on @stat and @bucket
+  def matrix
+    rows = []
+    @query.each do |event|
+      @stat.add event
+    end
+    rows.unshift([@bucket.name, *@stat.headers])
+    @stat.each do |stat|
+      rows << stat
+    end
+    [*rows]
   end
 
-  def average field
-    count, sum = 0.0, 0.0
-    @query.each do |event|
-      count += 1
-      sum += Float(event[field])
-    end
-    if count > 0
-      [field => sum / count]
-    else
-      []
-    end
-  end
 end
