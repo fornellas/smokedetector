@@ -62,7 +62,7 @@ class Query
       end
     end
 
-    # Return an array of 'count' arguments from @filters, starting at 1.
+    # Return an array of 'count' arguments from @query, starting at 1.
     def self.fetch_args count
       cli = @query.shift(1+count)
       command = cli.first
