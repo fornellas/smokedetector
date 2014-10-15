@@ -45,6 +45,23 @@ describe Report do
           ['/b',  2, 2],
           ],
         },
+      {
+        report: ['uniq_count', 'status', 'by', 'field', 'url'],
+        result: [
+          ['url', 'uniq_count status'],
+          ['/a',  1],
+          ['/b',  2],
+          ],
+        },
+      {
+        report: ['uniq_count', 'status/url', 'by', 'minute'],
+        result: [
+          ['time',                         '/a', '/b'],
+          [Time.parse('Sep 13 16:05:00'), 1,    1],
+          [Time.parse('Sep 13 16:06:00'), 1,    1],
+          [Time.parse('Sep 13 16:07:00'), 0,     2],
+          ],
+        },
       ].each do |ex|
       example ex[:report].join(' ') do
         result = @report.where(ex[:report])

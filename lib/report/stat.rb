@@ -9,9 +9,9 @@ class Stat
   # Parse stat function and return Stat object, consuming only known
   # arguments from report array.
   def self.parse args
-  	@args = args
+    @args = args
     case @args.first
-    when 'average', 'count'
+    when 'average', 'count', 'uniq_count'
       stat = @args.first.to_sym
       @fields = fetch_args(1).first
       return Stat.new(stat, *fetch_fields)
@@ -50,7 +50,7 @@ class Stat
       ["#{@stat} #{@field}"]
     else
       [*@headers].sort
-    end    
+    end
   end
 
   def add event
@@ -130,6 +130,27 @@ class Stat
       @counter[key]
     else
       Float::NAN
+    end
+  end
+
+  # uniq_count
+
+  def uniq_count_init
+    @list = {}
+  end
+
+  def uniq_count_add
+    @list[add_key] ||= []
+    unless @list[add_key].include? @event[@field]
+      @list[add_key] << @event[@field]
+    end
+  end
+
+  def uniq_count_consolidate key
+    if @list[key]
+      @list[key].count
+    else
+      0
     end
   end
 
