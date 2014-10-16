@@ -11,14 +11,13 @@ class Stat
   def self.parse args
     @args = args
     case @args.first
-    when 'average', 'count', 'uniq_count'
+    when 'average', 'count', 'uniq_count', 'maximum', 'minimum', 'sum'
       stat = @args.first.to_sym
       @fields = fetch_args(1).first
       return Stat.new(stat, *fetch_fields)
     else
       raise "Unknown stat command '#{@args.first}'"
     end
-
   end
 
   private
@@ -151,6 +150,76 @@ class Stat
       @list[key].count
     else
       0
+    end
+  end
+
+  # maximum
+
+  def maximum_init
+    @maximum = {}
+  end
+
+  def maximum_add
+    value = Float(@event[@field])
+    if @maximum[add_key]
+      if @maximum[add_key] < value
+        @maximum[add_key] = value
+      end
+    else
+      @maximum[add_key] = value
+    end
+  end
+
+  def maximum_consolidate key
+    if @maximum[key]
+      @maximum[key]
+    else
+      Float::NAN
+    end
+  end
+
+  # minimum
+
+  def minimum_init
+    @minimum = {}
+  end
+
+  def minimum_add
+    value = Float(@event[@field])
+    if @minimum[add_key]
+      if @minimum[add_key] > value
+        @minimum[add_key] = value
+      end
+    else
+      @minimum[add_key] = value
+    end
+  end
+
+  def minimum_consolidate key
+    if @minimum[key]
+      @minimum[key]
+    else
+      Float::NAN
+    end
+  end
+
+  # sum
+
+  def sum_init
+    @sum = {}
+  end
+
+  def sum_add
+    value = Float(@event[@field])
+    @sum[add_key] ||= 0
+    @sum[add_key] += value
+  end
+
+  def sum_consolidate key
+    if @sum[key]
+      @sum[key]
+    else
+      Float::NAN
     end
   end
 

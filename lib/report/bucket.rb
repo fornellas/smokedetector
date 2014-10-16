@@ -10,9 +10,18 @@ class Bucket
     when 'field'
       field = fetch_args(1).first
       return Bucket.new(bucket: :field, field: field)
+    when 'second'
+      @args.shift
+      return Bucket.new(bucket: :time, seconds: 1)
     when 'minute'
       @args.shift
       return Bucket.new(bucket: :time, seconds: 60)
+    when 'hour'
+      @args.shift
+      return Bucket.new(bucket: :time, seconds: 3600)
+    when 'partition'
+      field, partition_size = *fetch_args(2)
+      return Bucket.new(bucket: :partition, field: field, partition_size: partition_size)
     else
       raise "Unknown bucket '#{@args.first}'."
     end
@@ -54,10 +63,26 @@ class Bucket
     event[@field]
   end
 
+  # partition
+
+  def partition_init options
+    @field = options[:field]
+    @partition_size = Float(options[:partition_size])
+  end
+
+  def partition_name
+    @field
+  end
+
+  def partition_get event
+    value = Float(event[@field])
+    value - ( value % @partition_size )
+  end
+
   # time
 
   def time_init options
-    @seconds = options[:seconds]
+    @seconds = Integer(options[:seconds])
   end
 
   def time_name
