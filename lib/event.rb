@@ -17,8 +17,7 @@ class Event
     else
       time_str = raw
     end
-    gmt = DateTime.strptime(time_str, type.time_format).to_time
-    gmt - Time.now.gmtoff
+    Time.strptime(time_str, type.time_format).to_time
   end
 
   # Extract fields from event. Field names are returned by #type.field_names
