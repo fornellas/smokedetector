@@ -123,7 +123,7 @@ describe Report do
         ].each do |ex|
         example ex[:report].join(' ') do
           result = @report.where(ex[:report])
-          expected_result = [*ex[:result]]
+          expected_result = Matrix[*ex[:result]]
           expect(result).to eq(expected_result)
         end
       end
@@ -186,7 +186,7 @@ describe Report do
         ].each do |ex|
         example ex[:report].join(' ') do
           result = @report.where(ex[:report])
-          expected_result = [*ex[:result]]
+          expected_result = Matrix[*ex[:result]]
           expect(result).to eq(expected_result)
         end
       end

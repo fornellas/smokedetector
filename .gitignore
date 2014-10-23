@@ -1,3 +1,4 @@
+.tags*
 *.swp
 *.gem
 *.rbc
@@ -33,4 +34,4 @@ build/
 # .ruby-version
 # .ruby-gemset
 
-gem_home
+.gem_home

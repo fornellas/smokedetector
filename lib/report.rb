@@ -1,5 +1,6 @@
 require 'report/stat'
 require 'report/bucket'
+require 'matrix'
 
 class Report
 
@@ -31,7 +32,7 @@ class Report
     @stat.each do |stat|
       rows << stat
     end
-    [*rows]
+    Matrix[*rows]
   end
 
 end
