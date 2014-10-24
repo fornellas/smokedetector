@@ -26,7 +26,7 @@ class Query
   end
 
   private
- 
+
   # Return true if given event matches all filters at @*_filters.
   def match? event
     @filters.each do |filter|
