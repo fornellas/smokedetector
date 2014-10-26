@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    ansi (1.4.3)
     diff-lcs (1.2.5)
     rspec (3.1.0)
       rspec-core (~> 3.1.0)
@@ -19,4 +20,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  ansi
   rspec
