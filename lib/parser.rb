@@ -1,4 +1,3 @@
-require 'pp'
 class Parser
 
   PUBLIC_ATTRS = [

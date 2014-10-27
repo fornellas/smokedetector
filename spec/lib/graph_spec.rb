@@ -3,26 +3,25 @@ require 'matrix'
 
 describe Graph do
   context '#print' do
+    include_context 'http type'
+    include_context 'parser http'
+
     before(:example) do
-      @report = Matrix[
-        ['response_time', '/a', '/b'],
-        [0,  0, 5],
-        [1,  1, 4],
-        [2,  2, 3],
-        [5,  3, 2],
-    	]
+      query = Query.new parser_http
+      @report = Report.new(query)
     end
 
-    it "should print a graph" do
-      graph = Graph.new @report
-      graph.show
+    it 'works with x as strings' do
+      report = ['average','response_time/status','by','field', 'url']
+      graph = Graph.new @report.where(report)
+      graph.fprint STDERR
     end
 
-    xit "generates stacked graph" do
+    xit 'works with x as numbers' do
 
     end
 
-    xit "generates side by side bar graph" do
+    xit 'works with x as time' do
 
     end
 
@@ -38,16 +37,16 @@ describe Graph do
 
     end
 
-    xit 'works with x as strings' do
+    xit 'should throw exeption if terminal width is small' do
 
     end
 
-    xit 'works with x as numbers' do
+    xit 'should throw exeption if terminal height is small' do
 
     end
 
-    xit 'works with x as time' do
-
+    xit 'should throw exception if io is not a terminal' do
+      
     end
 
   end
