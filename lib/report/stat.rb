@@ -106,7 +106,7 @@ class Stat
     if @sum[key]
       @sum[key]/@counter[key]
     else
-      Float::NAN
+      nil
     end
   end
 
@@ -128,7 +128,7 @@ class Stat
     if @counter[key]
       @counter[key]
     else
-      Float::NAN
+      nil
     end
   end
 
@@ -174,7 +174,7 @@ class Stat
     if @maximum[key]
       @maximum[key]
     else
-      Float::NAN
+      nil
     end
   end
 
@@ -199,7 +199,7 @@ class Stat
     if @minimum[key]
       @minimum[key]
     else
-      Float::NAN
+      nil
     end
   end
 
@@ -219,7 +219,7 @@ class Stat
     if @sum[key]
       @sum[key]
     else
-      Float::NAN
+      nil
     end
   end
 

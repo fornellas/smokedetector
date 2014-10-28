@@ -25,7 +25,7 @@ describe Report do
           report: ['average','response_time/status','by','field', 'url'],
           result: [
             ['url', '200', '500'],
-            ['/a',  7/3.0, Float::NAN],
+            ['/a',  7/3.0, nil],
             ['/b',  3/2.0, 6/2.0],
             ],
           },
@@ -42,7 +42,7 @@ describe Report do
           report: ['count', 'events/status', 'by', 'field', 'url'],
           result: [
             ['url', '200', '500'],
-            ['/a',  3, Float::NAN],
+            ['/a',  3, nil],
             ['/b',  2, 2],
             ],
           },
@@ -79,7 +79,7 @@ describe Report do
             ['time',                        '/a',      '/b'],
             [Time.parse('Sep 13 16:05:00'), 3,          5],
             [Time.parse('Sep 13 16:06:00'), 3,          1],
-            [Time.parse('Sep 13 16:07:00'), Float::NAN, 2],
+            [Time.parse('Sep 13 16:07:00'), nil, 2],
             ],
           },
         # minimum
@@ -97,7 +97,7 @@ describe Report do
             ['time',                        '/a',      '/b'],
             [Time.parse('Sep 13 16:05:00'), 1,          5],
             [Time.parse('Sep 13 16:06:00'), 3,          1],
-            [Time.parse('Sep 13 16:07:00'), Float::NAN, 1],
+            [Time.parse('Sep 13 16:07:00'), nil, 1],
             ],
           },
         # median
@@ -117,7 +117,7 @@ describe Report do
             ['time',                        '/a',      '/b'],
             [Time.parse('Sep 13 16:05:00'), 4,          5],
             [Time.parse('Sep 13 16:06:00'), 3,          1],
-            [Time.parse('Sep 13 16:07:00'), Float::NAN, 3],
+            [Time.parse('Sep 13 16:07:00'), nil, 3],
             ],
           },
         ].each do |ex|
@@ -172,7 +172,7 @@ describe Report do
             ['time',                        '/a', '/b'],
             [Time.parse('Sep 13 16:05:00'), 2,    1],
             [Time.parse('Sep 13 16:06:00'), 1,    1],
-            [Time.parse('Sep 13 16:07:00'), Float::NAN,    2],
+            [Time.parse('Sep 13 16:07:00'), nil,    2],
             ],
           },
         # hour
