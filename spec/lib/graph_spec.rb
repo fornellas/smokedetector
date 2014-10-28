@@ -12,7 +12,7 @@ describe Graph do
     end
 
     it 'works with x as strings' do
-      report = ['average','response_time/status','by','field', 'url']
+      report = ['minimum', 'response_time/url', 'by', 'minute']
       graph = Graph.new @report.where(report)
       graph.fprint STDERR
     end
@@ -46,6 +46,10 @@ describe Graph do
     end
 
     xit 'should throw exception if io is not a terminal' do
+      
+    end
+
+    xit 'works with negative numbers' do |variable|
       
     end
 
