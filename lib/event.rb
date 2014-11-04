@@ -23,7 +23,11 @@ class Event
   # Extract fields from event. Field names are returned by #type.field_names
   def [] field_name
     if matches = raw.match(type.fields)
-      matches[field_name]
+      if str = matches[field_name]
+        return str
+      else
+        return ''
+      end
     else
       raise "Unable to match event '#{raw}' against #{type.fields}."
     end
