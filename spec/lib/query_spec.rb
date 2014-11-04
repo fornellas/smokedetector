@@ -76,7 +76,7 @@ describe Query do
         event_count = @query.where(ex[:query].dup).count
         expect(event_count).to eq(ex[:expected_count])
       end
- 
+
       example "not " + ex[:query].join(' ') do
         event_count = @query.where(['not'] + ex[:query].dup).count
         expect(event_count).to eq(5-ex[:expected_count])
