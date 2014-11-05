@@ -28,7 +28,7 @@ class Graph
     # Scale
     horiz_divider
     to_buffer "\n" #TODO
-    printf @io, @buffer
+    printf @io, @buffer.gsub(/%/, '%%')
     @buffer
   end
 
@@ -46,8 +46,12 @@ class Graph
       printed = 0
       (1...@report.column_count).each do |column|
         next unless @report[row,column]
-        chars = ( @report[row,column] / max_graph ) * (graph_width-1)
-        (0...chars).each do
+        chars = ( @report[row,column].to_f / max_graph ) * (graph_width-1)
+        (0...chars.to_i).each do
+          printed += 1
+          to_buffer ANSI::String.new('#').send(AREA_COLORS[column-1])
+        end
+        if chars-chars.floor >= 0.5
           printed += 1
           to_buffer ANSI::String.new('#').send(AREA_COLORS[column-1])
         end
@@ -69,7 +73,7 @@ class Graph
     max
   end
 
-  AREA_COLORS = [:green, :yellow, :blue, :magenta, :cyan, :red]
+  AREA_COLORS = [:magenta, :blue, :cyan, :green, :yellow, :red, :bold]
 
   # if number of areas is greater than AREA_COLORS.size compact areas as needed.
   def compact_areas

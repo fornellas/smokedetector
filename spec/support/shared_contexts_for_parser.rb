@@ -19,3 +19,14 @@ shared_context 'parser http' do
       )
   end
 end
+
+shared_context 'parser nginx' do
+  let(:parser_nginx) do
+    Parser.new(
+      io: File.open('spec/support/logs/nginx'),
+      event_type: type,
+      max_line_length: 1000,
+      multi_line: false,
+      )
+  end
+end

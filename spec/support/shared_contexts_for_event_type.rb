@@ -52,3 +52,16 @@ add_event_type_context({
       )
   end
 end
+
+add_event_type_context({
+  name: 'nginx',
+  field_names: ["remote_addr", "remote_user", "day_of_month", "month_name", "year", "hour", "minute", "second", "timezone", "request_method", "request_uri", "http_version", "request", "status", "body_bytes_sent", "http_referer", "http_user_agent"], }) do
+  let(:type) do
+    Event::Type.new(
+      time_prefix: /^([^ ]+) - ([^ ]+) \[/,
+      time_format: '%b %d %H:%M:%S',
+      time_format: '%d/%b/%Y:%H:%M:%S %Z',
+      fields: /^(?<remote_addr>[^ ]+) - (?<remote_user>[^ ]+) \[(?<day_of_month>[0-9]+)\/(?<month_name>[^\/]+)\/(?<year>[0-9]+):(?<hour>[0-9]+):(?<minute>[0-9]+):(?<second>[0-9]+) (?<timezone>[^ ]+)\] "((?<request_method>[^ ]+) (?<request_uri>[^ ]+) (?<http_version>[^ ]+)|(?<request>[^"]+))" (?<status>[0-9]+) (?<body_bytes_sent>[0-9]+) "(?<http_referer>[^"]+)" "(?<http_user_agent>[^"]+)"$/,
+      )
+  end
+end
