@@ -12,9 +12,48 @@ class Graph
     @io = io
     @terminal_height, @terminal_width = io.winsize
     @buffer = ''
-    compact_areas
-    # Header
+    compact_columns
     horiz_divider
+    headers
+    horiz_divider
+    rows
+    horiz_divider
+    scale
+    printf @io, @buffer.gsub(/%/, '%%')
+    @buffer
+  end
+
+  private
+
+  ##
+  ## Columns
+  ##
+
+  # if number of columns is greater than max_columns compact areas as needed.
+  def compact_columns
+    return unless @report.column_count-1 > max_columns
+    lines = []
+    header = @report.row(0).to_a[(0...max_columns)] # header
+    header << 'others'
+    lines << header
+    (1...@report.row_count).each do |row_number|
+      row = @report.row(row_number).to_a
+      others = row[max_columns..row.size].inject(:+)
+      lines << ( row[0...max_columns] << others )
+    end
+    @report = Matrix[*lines]
+  end
+
+  def max_columns
+    AREA_COLORS.size
+  end
+
+  ##
+  ## Headers
+  ##
+
+  # add headers to @buffer
+  def headers
     to_buffer "|#{@report[0,0]}#{' '*(label_width-@report[0, 0].size)}"
     names = area_names
     first = names.shift
@@ -22,67 +61,6 @@ class Graph
     names.each do |labels|
       to_buffer "|#{' '*label_width}|#{labels}#{' '*(graph_width-labels.size)}|\n"
     end
-    horiz_divider
-    # rows
-    rows
-    # Scale
-    horiz_divider
-    to_buffer "\n" #TODO
-    printf @io, @buffer.gsub(/%/, '%%')
-    @buffer
-  end
-
-  private
-
-  # append giver string to @buffer
-  def to_buffer str
-    @buffer += str
-  end
-
-  # add each row to @buffer
-  def rows
-    (1...@report.row_count).each do |row|
-      to_buffer "|#{@report[row, 0]}#{' '*(label_width-@report[row, 0].to_s.size)}|"
-      printed = 0
-      (1...@report.column_count).each do |column|
-        next unless @report[row,column]
-        chars = ( @report[row,column].to_f / max_graph ) * (graph_width-1)
-        (0...chars.to_i).each do
-          printed += 1
-          to_buffer ANSI::String.new('#').send(AREA_COLORS[column-1])
-        end
-        if chars-chars.floor >= 0.5
-          printed += 1
-          to_buffer ANSI::String.new('#').send(AREA_COLORS[column-1])
-        end
-      end
-      to_buffer "#{' '*(graph_width-printed)}|\n"
-    end
-  end
-
-  # return the biggest sum of all rows
-  def max_graph
-    max = 0
-    (1...@report.row_count).each do |row|
-      sum_row = 0
-      (1...@report.column_count).each do |column|
-        sum_row += @report[row,column] if @report[row,column]
-      end
-      max = sum_row if sum_row > max
-    end
-    max
-  end
-
-  AREA_COLORS = [:magenta, :blue, :cyan, :green, :yellow, :red, :bold]
-
-  # if number of areas is greater than AREA_COLORS.size compact areas as needed.
-  def compact_areas
-    return unless @report.column_count-1 > AREA_COLORS.size
-    raise 'TODO'
-  end
-
-  def horiz_divider
-    to_buffer "+#{'-'*label_width}+#{'-'*graph_width}+\n"
   end
 
   # return array of lines with colored names of @report[0,1] up to
@@ -121,6 +99,68 @@ class Graph
     lines
   end
 
+  ##
+  ## rows
+  ##
+
+  # add each row to @buffer
+  def rows
+    (1...@report.row_count).each do |row|
+      to_buffer "|#{@report[row, 0]}#{' '*(label_width-@report[row, 0].to_s.size)}|"
+      printed = 0
+      (1...@report.column_count).each do |column|
+        next unless @report[row,column]
+        chars = ( @report[row,column].to_f / max_graph ) * (graph_width-1)
+        (0...chars.to_i).each do
+          printed += 1
+          to_buffer ANSI::String.new('#').send(AREA_COLORS[column-1])
+        end
+        if chars-chars.floor >= 0.5
+          printed += 1
+          to_buffer ANSI::String.new('#').send(AREA_COLORS[column-1])
+        end
+      end
+      to_buffer "#{' '*(graph_width-printed)}|\n"
+    end
+  end
+
+  # return the biggest sum of all rows
+  def max_graph
+    max = 0
+    (1...@report.row_count).each do |row|
+      sum_row = 0
+      (1...@report.column_count).each do |column|
+        sum_row += @report[row,column] if @report[row,column]
+      end
+      max = sum_row if sum_row > max
+    end
+    max
+  end
+
+  ##
+  ## Scale
+  ##
+
+  def scale
+  end
+
+  ##
+  ## Support
+  ##
+
+  AREA_COLORS = [:magenta, :blue, :cyan, :green, :yellow, :red, :bold]
+
+
+  # add divider to @buffer
+  def horiz_divider
+    to_buffer "+#{'-'*label_width}+#{'-'*graph_width}+\n"
+  end
+
+  # append giver string to @buffer
+  def to_buffer str
+    @buffer += str
+  end
+
   # return width of @report[*, 0]
   def label_width
     max_width = 0
@@ -138,4 +178,5 @@ class Graph
     raise 'Terminal width too small.' if width < 2
     width
   end
+
 end

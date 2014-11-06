@@ -90,10 +90,6 @@ describe Graph do
       end
 
       context 'columns' do
-        xit "consolidate columns if there are too many" do
-
-        end
-
         xit 'works with single column reports' do
 
         end
@@ -125,6 +121,30 @@ describe Graph do
 
         xit 'works with negative numbers' do
 
+        end
+      end
+    end
+
+    context 'private methods' do
+      context '#compact_columns' do
+        it 'should compact columns greater than max_columns to a "others"' do
+          report = Matrix[
+            ['url', '200', '400','500'],
+            ['/a',  3, 1, 3],
+            ['/b',  2, 2, 2],
+            ]
+          graph = Graph.new(report)
+          allow(graph).to receive(:max_columns).and_return(2)
+          compact_report = graph.instance_eval do
+            compact_columns
+            @report
+          end
+          expect(compact_report).to eq(
+            Matrix[
+              ["url", "200", "others"],
+              ["/a", 3, 4], ["/b", 2, 4]
+              ]
+            )
         end
       end
     end
