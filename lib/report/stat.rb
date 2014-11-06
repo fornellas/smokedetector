@@ -103,10 +103,11 @@ class Stat
   end
 
   def average_consolidate key
-    if @sum[key]
+    @sum[key] ||= 0
+    if @counter[key]
       @sum[key]/@counter[key]
     else
-      nil
+      0
     end
   end
 
@@ -125,11 +126,7 @@ class Stat
   end
 
   def count_consolidate key
-    if @counter[key]
-      @counter[key]
-    else
-      nil
-    end
+    @counter[key] ||= 0
   end
 
   # uniq_count
@@ -171,11 +168,7 @@ class Stat
   end
 
   def maximum_consolidate key
-    if @maximum[key]
-      @maximum[key]
-    else
-      nil
-    end
+    @maximum[key] ||= 0
   end
 
   # minimum
@@ -196,11 +189,7 @@ class Stat
   end
 
   def minimum_consolidate key
-    if @minimum[key]
-      @minimum[key]
-    else
-      nil
-    end
+    @minimum[key] ||= 0
   end
 
   # sum
@@ -216,11 +205,7 @@ class Stat
   end
 
   def sum_consolidate key
-    if @sum[key]
-      @sum[key]
-    else
-      nil
-    end
+    @sum[key] ||= 0
   end
 
 end
