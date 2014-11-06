@@ -1,8 +1,0 @@
-TODO
-
-- multi-line row names
-- draw
-- compact columns if number of columns is bigger than available colors
-- compact string rows if number bigger than terminal height
-- compact / expand time rows
-- compact / expand float rows

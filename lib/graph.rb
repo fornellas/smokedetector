@@ -16,6 +16,11 @@ class Graph
     horiz_divider
     headers
     horiz_divider
+    if @report[1,0].class == String
+      compact_rows
+    else
+      rescale_rows
+    end
     rows
     horiz_divider
     scale
@@ -33,7 +38,7 @@ class Graph
   def compact_columns
     return unless @report.column_count-1 > max_columns
     lines = []
-    header = @report.row(0).to_a[(0...max_columns)] # header
+    header = @report.row(0).to_a[(0...max_columns)]
     header << 'others'
     lines << header
     (1...@report.row_count).each do |row_number|
@@ -87,7 +92,7 @@ class Graph
             break
           else
             first_half = name.slice(0, split_point)
-            second_half = name.slice(split_point)
+            second_half = name.slice(split_point, name.size)
             colored_name = ANSI::String.new(first_half).send(AREA_COLORS[color])
             line_str += ANSI::String.new("") + ( ' ' * extra_space ) + colored_name
             names_list.unshift(second_half)
@@ -102,6 +107,38 @@ class Graph
   ##
   ## rows
   ##
+
+  # if number of rows is bigger than terminal height, compact as needed
+  def compact_rows
+    return unless @report.row_count-1 > available_rows
+    lines = []
+    header = @report.row(0).to_a
+    lines << header
+    (1...available_rows).each do |row_number|
+      lines << @report.row(row_number)
+    end
+    zero_array = Array.new(@report.column_count-1, 0)
+    sum = Vector[*zero_array]
+    (available_rows...@report.row_count).each do |row_number|
+      array = @report.row(row_number).to_a
+      array.shift
+      vector = Vector[*array]
+      sum += vector
+    end
+    lines << ['others', *sum.to_a]
+    @report = Matrix[*lines]
+  end
+
+  # rescale rows to make them fit all available terminal height
+  def rescale_rows
+    
+  end
+
+  # return number of rows available to be printed depending on headers already
+  # present at @buffer and tail legend
+  def available_rows
+    1000
+  end
 
   # add each row to @buffer
   def rows
@@ -120,7 +157,8 @@ class Graph
           to_buffer ANSI::String.new('#').send(AREA_COLORS[column-1])
         end
       end
-      to_buffer "#{' '*(graph_width-printed)}|\n"
+      to_buffer "#{' '*(graph_width-printed)}" if graph_width-printed > 0
+      to_buffer"|\n"
     end
   end
 
@@ -142,13 +180,14 @@ class Graph
   ##
 
   def scale
+
   end
 
   ##
   ## Support
   ##
 
-  AREA_COLORS = [:magenta, :blue, :cyan, :green, :yellow, :red, :bold]
+  AREA_COLORS = [:magenta, :blue, :cyan, :green, :yellow, :red]
 
 
   # add divider to @buffer
