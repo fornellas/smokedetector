@@ -87,19 +87,34 @@ describe Graph do
         allow(@io).to receive(:write)
       end
 
-      xit "works with all positive numbers" do
-          report = ['sum','body_bytes_sent','by','field', 'status']
-          graph = Graph.new(@report.where(report))
-          allow(@io).to receive(:winsize).and_return($stderr.winsize)
-          str = graph.fprint @io
-          $stderr << str
+      xexample "with all positive numbers" do
+          # report = ['sum','body_bytes_sent','by','field', 'status']
+          # graph = Graph.new(@report.where(report))
+          # allow(@io).to receive(:winsize).and_return([40, 30])
+          # str = graph.fprint @io
+          # $stderr << str
+          # pp str
       end
 
-      xit 'works with positive and negative numbers' do
+      xexample 'with positive and negative numbers' do
 
       end
 
-      xit 'works with all negative numbers' do |variable|
+      xexample 'with all negative numbers' do
+
+      end
+    end
+
+    context 'legend' do
+      xexample "with all positive numbers" do
+        
+      end
+
+      xexample "with positive and negative numbers" do
+        
+      end
+
+      xexample "with all negative numbers" do
         
       end
     end
@@ -183,12 +198,33 @@ describe Graph do
       end
 
       context '#available_rows' do
-        xit "should report rows available to be printed depending on IO.winsize, headers and scale" do
-          
+        before(:example) do
+          report = Matrix[
+            ['url', '200', '400','500'],
+            ['/a',  3, 1, 3],
+            ['/b',  2, 2, 2],
+            ['/c',  2, 0, 2],
+            ]
+          @graph = Graph.new(report)
         end
 
-        xit 'should throw exeption if terminal height is small' do
+        it "should report rows available to be printed depending on @terminal_height, headers and scale" do
+          rows = @graph.instance_eval do
+            @buffer = "+------+---------------------+\n|status|\e[35msum body_bytes_sent\e[0m  |\n+------+---------------------+\n"
+            @terminal_height = 7
+            available_rows
+          end
+          expect(rows).to eq(2)
+        end
 
+        it 'should throw exeption if terminal height is small' do
+          expect do
+            @graph.instance_eval do
+              @buffer = "+------+---------------------+\n|status|\e[35msum body_bytes_sent\e[0m  |\n+------+---------------------+\n"
+              @terminal_height = 5
+              available_rows
+            end
+          end.to raise_error
         end
       end
     end

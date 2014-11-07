@@ -135,9 +135,12 @@ class Graph
   end
 
   # return number of rows available to be printed depending on headers already
-  # present at @buffer and tail legend
+  # present at @buffer, @terminal_height and scale at bottom
   def available_rows
-    1000
+    headers_size = @buffer.split("\n").size
+    rows = @terminal_height - headers_size - 2
+    raise "Terminal too small" if rows < 1
+    rows
   end
 
   # add each row to @buffer
