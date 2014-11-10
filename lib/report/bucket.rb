@@ -47,12 +47,19 @@ class Bucket
     @list.sort
   end
 
+  # type: either :string or :continuous
+  attr_accessor :type
+
+  # For type = :continuous, return size of each bucket
+  attr_accessor :size
+
   private
 
   # field
 
   def field_init options
     @field = options[:field]
+    @type = :string
   end
 
   def field_name
@@ -68,6 +75,8 @@ class Bucket
   def partition_init options
     @field = options[:field]
     @partition_size = Float(options[:partition_size])
+    @type = :continuous
+    @size = @partition_size
   end
 
   def partition_name
@@ -83,6 +92,8 @@ class Bucket
 
   def time_init options
     @seconds = Integer(options[:seconds])
+    @type = :continuous
+    @size = @seconds.to_f
   end
 
   def time_name

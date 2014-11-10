@@ -16,7 +16,7 @@ class Graph
     horiz_divider
     headers
     horiz_divider
-    if @report[1,0].class == String
+    if @report.bucket_type == :string
       compact_rows
     else
       rescale_rows

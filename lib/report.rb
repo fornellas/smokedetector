@@ -32,7 +32,18 @@ class Report
     @stat.each do |stat|
       rows << stat
     end
-    Matrix[*rows]
+    result = Matrix[*rows]
+    eval("
+      def result.bucket_type
+        :#{@bucket.type}
+      end
+      ")
+    eval("
+      def result.bucket_size
+        #{@bucket.size}
+      end
+      ")
+    result
   end
 
 end
