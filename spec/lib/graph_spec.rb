@@ -213,9 +213,9 @@ describe Graph do
           report_data = report.where(where_query)
           graph = Graph.new(report_data)
           allow(io).to receive(:winsize).and_return([9, 50])
+          allow(graph).to receive(:available_rows).and_return(4)
           graph.fprint io
           rescaled_report_data = graph.instance_eval do
-            @buffer = "sep\nheader\nsep\n"
             rescale_rows
             @report_data
           end
