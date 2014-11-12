@@ -1,10 +1,11 @@
 require 'io/console'
 require 'ansi/string'
+require 'report/data'
 
 class Graph
 
-  def initialize report
-    @report = report
+  def initialize report_data
+    @report_data = report_data
   end
 
   # print graph to given IO object
@@ -16,14 +17,16 @@ class Graph
     horiz_divider
     headers
     horiz_divider
-    if @report.bucket_type == :string
-      compact_rows
-    else
-      rescale_rows
+    if matrix.row_count > 2
+      if @report_data.type == :string
+        compact_rows
+      else
+        rescale_rows
+      end
+      rows
+      horiz_divider
+      scale
     end
-    rows
-    horiz_divider
-    scale
     printf @io, @buffer.gsub(/%/, '%%')
     @buffer
   end
@@ -31,22 +34,34 @@ class Graph
   private
 
   ##
+  ## Helper
+  ##
+
+  def matrix
+    @report_data.matrix
+  end
+
+  ##
   ## Columns
   ##
 
   # if number of columns is greater than max_columns compact areas as needed.
   def compact_columns
-    return unless @report.column_count-1 > max_columns
+    return unless matrix.column_count-1 > max_columns
     lines = []
-    header = @report.row(0).to_a[(0...max_columns)]
+    header = matrix.row(0).to_a[(0...max_columns)]
     header << 'others'
     lines << header
-    (1...@report.row_count).each do |row_number|
-      row = @report.row(row_number).to_a
+    (1...matrix.row_count).each do |row_number|
+      row = matrix.row(row_number).to_a
       others = row[max_columns..row.size].inject(:+)
       lines << ( row[0...max_columns] << others )
     end
-    @report = Matrix[*lines]
+    @report_data = Report::Data.new(
+      matrix: Matrix[*lines],
+      type: @report_data.type,
+      size: @report_data.size,
+      )
   end
 
   def max_columns
@@ -59,7 +74,7 @@ class Graph
 
   # add headers to @buffer
   def headers
-    to_buffer "|#{@report[0,0]}#{' '*(label_width-@report[0, 0].size)}"
+    to_buffer "|#{matrix[0,0]}#{' '*(label_width-matrix[0, 0].size)}"
     names = area_names
     first = names.shift
     to_buffer "|#{first}#{' '*(graph_width-first.size)}|\n"
@@ -68,11 +83,11 @@ class Graph
     end
   end
 
-  # return array of lines with colored names of @report[0,1] up to
-  # @report[0, @report.column_count -1]
+  # return array of lines with colored names of matrix[0,1] up to
+  # matrix[0, matrix.column_count -1]
   def area_names
     lines = []
-    names_list = @report.row(0).to_a
+    names_list = matrix.row(0).to_a
     names_list.shift
     color = 0
     until names_list.empty?
@@ -108,30 +123,71 @@ class Graph
   ## rows
   ##
 
+  # matrix.@report_data.type == :string
+
   # if number of rows is bigger than terminal height, compact as needed
   def compact_rows
-    return unless @report.row_count-1 > available_rows
+    return unless matrix.row_count-1 > available_rows
     lines = []
-    header = @report.row(0).to_a
+    header = matrix.row(0).to_a
     lines << header
     (1...available_rows).each do |row_number|
-      lines << @report.row(row_number)
+      lines << matrix.row(row_number)
     end
-    zero_array = Array.new(@report.column_count-1, 0)
+    zero_array = Array.new(matrix.column_count-1, 0)
     sum = Vector[*zero_array]
-    (available_rows...@report.row_count).each do |row_number|
-      array = @report.row(row_number).to_a
+    (available_rows...matrix.row_count).each do |row_number|
+      array = matrix.row(row_number).to_a
       array.shift
       vector = Vector[*array]
       sum += vector
     end
     lines << ['others', *sum.to_a]
-    @report = Matrix[*lines]
+    @report_data = Report::Data.new(
+      matrix: Matrix[*lines],
+      type: @report_data.type,
+      size: @report_data.size,
+      )
   end
 
-  # rescale rows to make them fit all available terminal height
+  # matrix.@report_data.type == :continuous
+
+  # rescale rows to fill #available_rows
   def rescale_rows
-    
+    lines = []
+    header = matrix.row(0).to_a
+    lines << header
+    min = matrix[1,0]
+    max = matrix[matrix.row_count-1, 0] + @report_data.size
+    bucket_size = (max-min)/available_rows
+    # compute sum for each bucket
+    sums = {}
+    (min...max).step(bucket_size) do |bucket|
+      zero_array = Array.new(matrix.column_count-1, 0)
+      sums[bucket] = Vector[*zero_array]
+    end
+    (1...matrix.row_count).each do |row_number|
+      row_bucket = matrix.row(row_number)[0]
+      bucket = nil
+      (min...max).step(bucket_size) do |candidate_bucket|
+        if row_bucket >= candidate_bucket && row_bucket < candidate_bucket + bucket_size
+          bucket = candidate_bucket
+          break
+        end
+      end
+      row_data_array = matrix.row(row_number).to_a
+      row_data_array.shift
+      sums[bucket] += Vector[*row_data_array]
+    end
+    # update array
+    sums.keys.sort.each do |bucket|
+      lines << [bucket, *sums[bucket]]
+    end
+    @report_data = Report::Data.new(
+      matrix: Matrix[*lines],
+      type: @report_data.type,
+      size: @report_data.size,
+      )
   end
 
   # return number of rows available to be printed depending on headers already
@@ -145,12 +201,12 @@ class Graph
 
   # add each row to @buffer
   def rows
-    (1...@report.row_count).each do |row|
-      to_buffer "|#{@report[row, 0]}#{' '*(label_width-@report[row, 0].to_s.size)}|"
+    (1...matrix.row_count).each do |row|
+      to_buffer "|#{matrix[row, 0]}#{' '*(label_width-matrix[row, 0].to_s.size)}|"
       printed = 0
-      (1...@report.column_count).each do |column|
-        next unless @report[row,column]
-        chars = ( @report[row,column].to_f / max_graph ) * (graph_width-1)
+      (1...matrix.column_count).each do |column|
+        next unless matrix[row,column]
+        chars = ( matrix[row,column].to_f / max_graph ) * (graph_width-1)
         (0...chars.to_i).each do
           printed += 1
           to_buffer ANSI::String.new('#').send(AREA_COLORS[column-1])
@@ -168,10 +224,10 @@ class Graph
   # return the biggest sum of all rows
   def max_graph
     max = 0
-    (1...@report.row_count).each do |row|
+    (1...matrix.row_count).each do |row|
       sum_row = 0
-      (1...@report.column_count).each do |column|
-        sum_row += @report[row,column] if @report[row,column]
+      (1...matrix.column_count).each do |column|
+        sum_row += matrix[row,column] if matrix[row,column]
       end
       max = sum_row if sum_row > max
     end
@@ -203,11 +259,11 @@ class Graph
     @buffer += str
   end
 
-  # return width of @report[*, 0]
+  # return width of matrix[*, 0]
   def label_width
     max_width = 0
-    (0...@report.row_count).each do |row|
-      row_label_width = @report[row, 0].to_s.size
+    (0...matrix.row_count).each do |row|
+      row_label_width = matrix[row, 0].to_s.size
       max_width = row_label_width if row_label_width > max_width
     end
     max_width

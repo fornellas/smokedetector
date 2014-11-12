@@ -3,6 +3,7 @@ require 'parser'
 require 'report'
 require 'graph'
 require 'matrix'
+require 'report/data'
 
 describe Graph do
   context '#print' do
@@ -121,12 +122,16 @@ describe Graph do
 
     context 'private methods' do
       before(:example) do
-        @report = Matrix[
-          ['url', '200', '400','500'],
-          ['/a',  3, 1, 3],
-          ['/b',  2, 2, 2],
-          ]
-        @graph = Graph.new(@report)
+        @report_data = Report::Data.new(
+          matrix: Matrix[
+            ['url', '200', '400','500'],
+            ['/a',  3, 1, 3],
+            ['/b',  2, 2, 2],
+            ],
+          type: :string,
+          size: nil,
+          )
+        @graph = Graph.new(@report_data)
       end
 
       context '#compact_columns' do
@@ -134,9 +139,9 @@ describe Graph do
           allow(@graph).to receive(:max_columns).and_return(2)
           compact_report = @graph.instance_eval do
             compact_columns
-            @report
+            @report_data
           end
-          expect(compact_report).to eq(
+          expect(compact_report.matrix).to eq(
             Matrix[
               ["url", "200", "others"],
               ["/a", 3, 4],
@@ -147,32 +152,36 @@ describe Graph do
 
         it "should not compact rows if column count is less or equal to max_columns" do
           allow(@graph).to receive(:max_columns).and_return(3)
-          compact_report = @graph.instance_eval do
+          compact_report_data = @graph.instance_eval do
             compact_columns
-            @report
+            @report_data
           end
-          expect(compact_report).to eq(@report)
+          expect(compact_report_data.matrix).to eq(@report_data.matrix)
         end
       end
 
       context '#compact_rows' do
         before(:example) do
-          @report = Matrix[
-            ['url', '200', '400','500'],
-            ['/a',  3, 1, 3],
-            ['/b',  2, 2, 2],
-            ['/c',  2, 0, 2],
-            ]
-          @graph = Graph.new(@report)
+          @report_data = Report::Data.new(
+            matrix: Matrix[
+              ['url', '200', '400','500'],
+              ['/a',  3, 1, 3],
+              ['/b',  2, 2, 2],
+              ['/c',  2, 0, 2],
+              ],
+            type: :string,
+            size: nil,
+            )
+          @graph = Graph.new(@report_data)
         end
 
         it "should compact rows if row count is bigger than #available_rows" do
           allow(@graph).to receive(:available_rows).and_return(2)
-          compact_report = @graph.instance_eval do
+          compact_report_data = @graph.instance_eval do
             compact_rows
-            @report
+            @report_data
           end
-          expect(compact_report).to eq(
+          expect(compact_report_data.matrix).to eq(
             Matrix[
               ['url',    '200', '400','500'],
               ['/a',     3, 1, 3],
@@ -183,17 +192,42 @@ describe Graph do
 
         it "should not compact rows if row count is less or equal to #available_rows" do
           allow(@graph).to receive(:available_rows).and_return(3)
-          compact_report = @graph.instance_eval do
+          compact_report_data = @graph.instance_eval do
             compact_rows
-            @report
+            @report_data
           end
-          expect(compact_report).to eq(@report)
+          expect(compact_report_data.matrix).to eq(@report_data.matrix)
         end
       end
 
       context '#rescale_rows' do
-        xit "should rescale rows to fill #available_rows" do
-          
+        include_context 'nginx type'
+        include_context 'parser nginx'
+
+        it "should rescale rows to fill #available_rows" do
+          query = Query.new parser_nginx
+          report = Report.new(query)
+          io = instance_double('IO')
+          allow(io).to receive(:write)
+          where_query = ['sum','body_bytes_sent/status','by','partition', 'body_bytes_sent', '1000']
+          report_data = report.where(where_query)
+          graph = Graph.new(report_data)
+          allow(io).to receive(:winsize).and_return([9, 50])
+          graph.fprint io
+          rescaled_report_data = graph.instance_eval do
+            @buffer = "sep\nheader\nsep\n"
+            rescale_rows
+            @report_data
+          end
+          expect(rescaled_report_data.matrix).to eq(
+            Matrix[
+              ["body_bytes_sent", "200", "207", "301", "400", "401", "others"],
+              [0.0, 2589076.0, 575011.0, 552.0, 0.0, 304.0, 7436.0],
+              [14687.5, 0, 0, 0, 0, 0, 0],
+              [29375.0, 0, 0, 0, 0, 0, 0],
+              [44062.5, 1451940.0, 0, 0, 0, 0, 0]
+              ]
+            )
         end
       end
 

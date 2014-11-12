@@ -1,5 +1,6 @@
 require 'report/stat'
 require 'report/bucket'
+require 'report/data'
 require 'matrix'
 
 class Report
@@ -32,18 +33,11 @@ class Report
     @stat.each do |stat|
       rows << stat
     end
-    result = Matrix[*rows]
-    eval("
-      def result.bucket_type
-        :#{@bucket.type}
-      end
-      ")
-    eval("
-      def result.bucket_size
-        #{@bucket.size}
-      end
-      ")
-    result
+    Data.new(
+      matrix: Matrix[*rows],
+      type: @bucket.type,
+      size: @bucket.size
+      )
   end
 
 end
