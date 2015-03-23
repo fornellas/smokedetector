@@ -10,7 +10,8 @@ class Graph
 
   # Write graph to given IO object, which must respond to #winsize.
   def fprint io
-    raise
+    @terminal_height, @terminal_width = io.winsize
+    
   end
 
   private
