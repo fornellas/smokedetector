@@ -10,7 +10,7 @@ class Graph
 
   # Write graph to given IO object, which must respond to #winsize.
   def fprint io
-    io.write @report_data.matrix
+    raise
   end
 
   private
