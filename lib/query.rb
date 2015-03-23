@@ -20,8 +20,8 @@ class Query
   end
 
   # Filter events matching given criteria.
-  def where query
-    @filters = Filter.parse(query)
+  def where filter
+    @filters = Filter.parse(filter)
     self
   end
 

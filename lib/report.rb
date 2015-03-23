@@ -1,7 +1,6 @@
 require 'report/stat'
 require 'report/bucket'
 require 'report/data'
-require 'matrix'
 
 class Report
 
@@ -11,12 +10,12 @@ class Report
     @bucket = nil
   end
 
-  def where report
-    @stat = Stat.parse(report)
-    if 'by' != (arg=report.shift)
+  def where stat_by_bucket
+    @stat = Stat.parse(stat_by_bucket)
+    if 'by' != (arg=stat_by_bucket.shift)
       raise "Wrong argument '#{arg}', should be 'by'."
     end
-    @bucket = Bucket.parse(report)
+    @bucket = Bucket.parse(stat_by_bucket)
     @stat.bucket = @bucket
     matrix
   end
@@ -34,7 +33,7 @@ class Report
       rows << stat
     end
     Data.new(
-      matrix: Matrix[*rows],
+      matrix: [*rows],
       type: @bucket.type,
       size: @bucket.size
       )

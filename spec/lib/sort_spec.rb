@@ -1,8 +1,8 @@
 require 'sort'
 
 describe Sort do
-  before(:example) do
-    @sort = Sort.new(
+  let(:sort) do
+    Sort.new(
       [
         ['url', '200', '500'],
         ['/b',  1, 2],
@@ -47,7 +47,7 @@ describe Sort do
         },
       ].each do |ex|
       example ex[:sort].join(' ') do
-          result = @sort.by(ex[:sort])
+          result = sort.by(ex[:sort])
           expected_result = [*ex[:result]]
           expect(result).to eq(expected_result)
       end

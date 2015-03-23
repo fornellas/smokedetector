@@ -4,9 +4,9 @@ describe Report do
   include_context 'http type'
   include_context 'parser http'
 
-  before(:example) do
-    query = Query.new parser_http
-    @report = Report.new(query)
+  let(:report) do
+    query = Query.new(parser_http)
+    Report.new(query)
   end
 
   context "#where" do
@@ -14,7 +14,7 @@ describe Report do
       [
         # average
         {
-          report: ['average','response_time','by','field', 'url'],
+          stat_by_bucket: ['average','response_time','by','field', 'url'],
           result: [
             ['url', 'average response_time'],
             ['/a',  7/3.0],
@@ -22,7 +22,7 @@ describe Report do
             ],
           },
         {
-          report: ['average','response_time/status','by','field', 'url'],
+          stat_by_bucket: ['average','response_time/status','by','field', 'url'],
           result: [
             ['url', '200', '500'],
             ['/a',  7/3.0, 0],
@@ -31,7 +31,7 @@ describe Report do
           },
         # count
         {
-          report: ['count', 'events', 'by', 'field', 'url'],
+          stat_by_bucket: ['count', 'events', 'by', 'field', 'url'],
           result: [
             ['url', 'count events'],
             ['/a',  3],
@@ -39,7 +39,7 @@ describe Report do
             ],
           },
         {
-          report: ['count', 'events/status', 'by', 'field', 'url'],
+          stat_by_bucket: ['count', 'events/status', 'by', 'field', 'url'],
           result: [
             ['url', '200', '500'],
             ['/a',  3, 0],
@@ -48,7 +48,7 @@ describe Report do
           },
         # uniq_count
         {
-          report: ['uniq_count', 'status', 'by', 'field', 'url'],
+          stat_by_bucket: ['uniq_count', 'status', 'by', 'field', 'url'],
           result: [
             ['url', 'uniq_count status'],
             ['/a',  1],
@@ -56,7 +56,7 @@ describe Report do
             ],
           },
         {
-          report: ['uniq_count', 'status/url', 'by', 'minute'],
+          stat_by_bucket: ['uniq_count', 'status/url', 'by', 'minute'],
           result: [
             ['time',                        '/a', '/b'],
             [Time.parse('Sep 13 16:05:00'), 1,    1],
@@ -66,7 +66,7 @@ describe Report do
           },
         # maximum
         {
-          report: ['maximum', 'response_time', 'by', 'field', 'url'],
+          stat_by_bucket: ['maximum', 'response_time', 'by', 'field', 'url'],
           result: [
             ['url', 'maximum response_time'],
             ['/a',  3],
@@ -74,7 +74,7 @@ describe Report do
             ],
           },
         {
-          report: ['maximum', 'response_time/url', 'by', 'minute'],
+          stat_by_bucket: ['maximum', 'response_time/url', 'by', 'minute'],
           result: [
             ['time',                        '/a',      '/b'],
             [Time.parse('Sep 13 16:05:00'), 3,          5],
@@ -84,7 +84,7 @@ describe Report do
           },
         # minimum
         {
-          report: ['minimum', 'response_time', 'by', 'field', 'url'],
+          stat_by_bucket: ['minimum', 'response_time', 'by', 'field', 'url'],
           result: [
             ['url', 'minimum response_time'],
             ['/a',  1],
@@ -92,7 +92,7 @@ describe Report do
             ],
           },
         {
-          report: ['minimum', 'response_time/url', 'by', 'minute'],
+          stat_by_bucket: ['minimum', 'response_time/url', 'by', 'minute'],
           result: [
             ['time',                        '/a',      '/b'],
             [Time.parse('Sep 13 16:05:00'), 1,          5],
@@ -104,7 +104,7 @@ describe Report do
         # mode
         # sum
         {
-          report: ['sum', 'response_time', 'by', 'field', 'url'],
+          stat_by_bucket: ['sum', 'response_time', 'by', 'field', 'url'],
           result: [
             ['url', 'sum response_time'],
             ['/a',  7],
@@ -112,7 +112,7 @@ describe Report do
             ],
           },
         {
-          report: ['sum', 'response_time/url', 'by', 'minute'],
+          stat_by_bucket: ['sum', 'response_time/url', 'by', 'minute'],
           result: [
             ['time',                        '/a',      '/b'],
             [Time.parse('Sep 13 16:05:00'), 4,          5],
@@ -121,9 +121,9 @@ describe Report do
             ],
           },
         ].each do |ex|
-        example ex[:report].join(' ') do
-          result = @report.where(ex[:report])
-          expected_result_matrix = Matrix[*ex[:result]]
+        example ex[:stat_by_bucket].join(' ') do
+          result = report.where(ex[:stat_by_bucket])
+          expected_result_matrix = [*ex[:result]]
           expect(result.matrix).to eq(expected_result_matrix)
         end
       end
@@ -133,7 +133,7 @@ describe Report do
       [
         # field
         {
-          report: ['average','response_time','by','field', 'url'],
+          stat_by_bucket: ['average','response_time','by','field', 'url'],
           result: [
             ['url', 'average response_time'],
             ['/a',  7/3.0],
@@ -142,7 +142,7 @@ describe Report do
           },
         # partition
         {
-          report: ['count','events','by','partition', 'response_time', '2'],
+          stat_by_bucket: ['count','events','by','partition', 'response_time', '2'],
           result: [
             ['response_time', 'count events'],
             [0,  3],
@@ -152,7 +152,7 @@ describe Report do
           },
         # second
         {
-          report: ['count', 'events', 'by', 'second'],
+          stat_by_bucket: ['count', 'events', 'by', 'second'],
           result: [
             ['time',                        'count events'],
             [Time.parse('Sep 13 16:05:01'), 1],
@@ -167,7 +167,7 @@ describe Report do
           },
         # minute
         {
-          report: ['count', 'events/url', 'by', 'minute'],
+          stat_by_bucket: ['count', 'events/url', 'by', 'minute'],
           result: [
             ['time',                        '/a', '/b'],
             [Time.parse('Sep 13 16:05:00'), 2,    1],
@@ -177,16 +177,16 @@ describe Report do
           },
         # hour
         {
-          report: ['count', 'events/url', 'by', 'hour'],
+          stat_by_bucket: ['count', 'events/url', 'by', 'hour'],
           result: [
             ['time',                        '/a', '/b'],
             [Time.parse('Sep 13 16:00:00'), 3,    4],
             ],
           },
         ].each do |ex|
-        example ex[:report].join(' ') do
-          result = @report.where(ex[:report])
-          expected_result_matrix = Matrix[*ex[:result]]
+        example ex[:stat_by_bucket].join(' ') do
+          result = report.where(ex[:stat_by_bucket])
+          expected_result_matrix = [*ex[:result]]
           expect(result.matrix).to eq(expected_result_matrix)
         end
       end
