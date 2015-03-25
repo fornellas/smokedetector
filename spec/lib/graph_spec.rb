@@ -125,9 +125,33 @@ describe Graph do
     end
 
     context '#compact_areas' do
-      # TODO
-      it 'compacts @report_data if it has more areas than #max_areas'
-      it 'does not compact @report_data if it has less or equal areas than #max_areas'
+
+      it 'compacts @report_data if it has more areas than #max_areas' do
+        allow(graph).to receive(:max_areas).and_return(3)
+        compact_report_data = graph.instance_eval do
+          new_graph 10
+          compact_areas
+          @report_data
+        end
+        expect(compact_report_data.matrix).to eq(
+          [
+            ["time", "-", "Feedly/1.0 (+http://www.feedly.com/fetcher.html; like FeedFetcher-Google)","others"],
+            [Time.parse("2014-11-04 18:00:00 -0200"), 2, 2, 374],
+            [Time.parse("2014-11-04 19:00:00 -0200"), 6, 0, 389],
+            [Time.parse("2014-11-04 20:00:00 -0200"), 3, 1, 215]
+            ])
+      end
+
+      it 'does not compact @report_data if it has less or equal areas than #max_areas' do
+        allow(graph).to receive(:max_areas).and_return(9)
+        compact_report_data = graph.instance_eval do
+          new_graph 10
+          compact_areas
+          @report_data
+        end
+        expect(compact_report_data.matrix).to eq(graph.instance_eval{@original_report_data.matrix})
+      end
+
     end
 
     context '#max_areas' do
