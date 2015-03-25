@@ -1,4 +1,4 @@
-#require 'io/console'
+require 'io/console'
 require 'report/data'
 require 'ansi/string'
 
@@ -18,7 +18,7 @@ class Graph
     get_terminal_attrs
     max_label_width.downto(min_label_width).each do |label_width|
       new_graph(label_width)
-#      compact_areas
+      compact_areas
 #      draw_header
 #      compact_rows
 #      draw_rows
