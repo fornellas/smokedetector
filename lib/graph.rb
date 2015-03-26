@@ -19,8 +19,8 @@ class Graph
     max_label_width.downto(min_label_width).each do |label_width|
       new_graph(label_width)
       compact_areas
-#      draw_header
-#      compact_rows
+      draw_header
+      compact_rows
 #      draw_rows
       # Retry if label_width was too big
       if @biggest_label_width < @label_width and @label_width > min_label_width
@@ -63,8 +63,13 @@ class Graph
   # Draw headers based on @label_width
   def draw_header
     horiz_divider
-    @buffer += "|#{label(@report_data.matrix[0][0])}|"
-    # TODO
+    @buffer += "|#{label(matrix[0][0])}"
+    names = area_names
+    first = names.shift
+    @buffer += "|#{first}#{' '*(graph_width-first.size)}|\n"
+    names.each do |labels|
+      @buffer += "|#{' '*@label_width}|#{labels}#{' '*(graph_width-labels.size)}|\n"
+    end
     horiz_divider
   end
 
@@ -85,21 +90,61 @@ class Graph
     end
   end
 
+  # Return an Array of lines with colored area names, to support #draw_header.
+  def area_names
+    lines = []
+    names_list = matrix[0]
+    names_list.shift
+    color = 0
+    until names_list.empty?
+      line_str = ANSI::String.new("")
+      while line_str.size < graph_width
+        break if names_list.empty?
+        extra_space = line_str.text.empty? ? 0 : 1
+        if line_str.size + extra_space + names_list.first.size <= graph_width
+          colored_name = ANSI::String.new(names_list.shift).send(AREA_COLORS[color])
+          color += 1
+          line_str += ANSI::String.new("") + ( ' ' * extra_space ) + colored_name
+        else
+          name = names_list.shift
+          split_point = graph_width - (line_str.size + extra_space)
+          if split_point == 0
+            names_list.unshift name
+            break
+          else
+            first_half = name.slice(0, split_point)
+            second_half = name.slice(split_point, name.size)
+            colored_name = ANSI::String.new(first_half).send(AREA_COLORS[color])
+            line_str += ANSI::String.new("") + ( ' ' * extra_space ) + colored_name
+            names_list.unshift(second_half)
+          end
+        end
+      end
+      lines << line_str
+    end
+    lines
+  end
+
+  # Maximum number or graph areas
+  def max_areas
+    AREA_COLORS.size
+  end
+
   # ----------------------------------------
   # :section: @report_data processing
   # ----------------------------------------
 
   # Compact @report_data to fit #max_areas.
   def compact_areas
-    report_areas = @report_data.matrix[0].size - 1
+    report_areas = matrix[0].size - 1
     return unless report_areas > max_areas
     lines = []
-    header = @report_data.matrix[0][(0...max_areas)]
+    header = matrix[0][(0...max_areas)]
     header << 'others'
     lines << header
-    row_count = @report_data.matrix.size
+    row_count = matrix.size
     (1...row_count).each do |row_number|
-      row = @report_data.matrix[row_number]
+      row = matrix[row_number]
       others = row[max_areas..row.size].inject(:+)
       lines << ( row[0...max_areas] << others )
     end
@@ -110,9 +155,37 @@ class Graph
       )
   end
 
-  # Maximum number or graph areas
-  def max_areas
-    AREA_COLORS.size
+  # Compact @report_data to fit #max_rows_height if it is bigger.
+  def compact_rows
+    self.send("compact_rows_#{@report_data.type}")
+  end
+
+  # Support for #compact_rows
+  def compact_rows_field
+    lines = []
+    lines << matrix[0]
+    (1...max_rows_height).each do |row|
+      lines << matrix[row]
+    end
+    columns = matrix[0].size
+    column_values = Array.new(columns - 1)
+    column_values.map!{[]}
+    (max_rows_height...matrix.size).each do |row|
+      (1...columns).each do |column|
+        column_values[column - 1] << matrix[row][column]
+      end
+    end
+    lines << ['others'] + column_values.map!{|v| v.inject(:+)}
+    @report_data = Report::Data.new(
+      matrix: [*lines],
+      type: @report_data.type,
+      size: @report_data.size,
+      )
+  end
+
+  # Alias for matrix
+  def matrix
+    @report_data.matrix
   end
 
   # ----------------------------------------
@@ -139,6 +212,20 @@ class Graph
     3 + # borders
     min_label_width +
     min_graph_width
+  end
+
+  # Assuming @buffer contains only the header, return its height
+  def header_height
+    @buffer.split("\n").size
+  end
+
+  # Height of last graph line, its scale
+  def scale_height ; 1 ; end
+
+  # Maximum number of rows
+  def max_rows_height
+   max = @terminal_height - header_height - scale_height - 1
+   max < 2 ? 2 : max
   end
 
 end
